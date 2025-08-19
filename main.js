@@ -4,6 +4,10 @@ const SERVER_ID = "66af4fbe9dd0740a80453310"; // rustopia.gg eu main server
 const TYPE = "Leaderboard";
 const TEAM_API = "https://api.rankeval.gg/api/getteamleaderboards";
 
+// --- BattleMetrics Config ---
+const BM_SERVER_ID = "15096801"; // BattleMetrics server id for your target server
+const BM_BASE = "https://api.battlemetrics.com/players";
+
 const $ = (s) => document.querySelector(s);
 const playerInput = $("#player");
 const fetchBtn = $("#fetchBtn");
@@ -32,9 +36,16 @@ function buildPlayerUrl(name) {
     const q = encodeURIComponent((name || "").trim());
     return `${PLAYER_API}?q=${q}&ServerFilter=${SERVER_ID}&Type=${TYPE}`;
 }
+
 function buildTeamUrl(steam) {
     const q = encodeURIComponent(steam);
     return `${TEAM_API}?q=${q}&ServerFilter=${SERVER_ID}`;
+}
+
+function buildBMUrl(name) {
+    // exact-match selection is done client-side after we fetch
+    const q = encodeURIComponent(name.trim());
+    return `${BM_BASE}?page[size]=10&include=server&fields[server]=&filter[servers]=${BM_SERVER_ID}&filter[search]=${q}`;
 }
 
 function setStatus(text, isError = false) {
@@ -55,21 +66,95 @@ function fmtTime(seconds) {
     const h = Math.floor(seconds / 3600), m = Math.floor((seconds % 3600) / 60); return `${h}h ${m}m`;
 }
 
+function fmtISO(iso) {
+    if (!iso) return "—";
+    const d = new Date(iso);
+    if (isNaN(d)) return "—";
+    // Local time; you’re in Europe/Berlin (CET/CEST)
+    return d.toLocaleString();
+}
+
 function emptyTeamTable() {
     tblTeam.innerHTML = `<tr><td colspan="6" class="muted" style="text-align:center">No team data</td></tr>`;
+}
+
+// polite fetch with retry + small delay (helps with rate limits)
+async function fetchJSON(url, retries = 2, delayMs = 400) {
+    for (let i = 0; i <= retries; i++) {
+        try {
+            const res = await fetch(url, { headers: { Accept: "application/json" } });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            return await res.json();
+        } catch (e) {
+            if (i === retries) throw e;
+            await new Promise(r => setTimeout(r, delayMs * (i + 1)));
+        }
+    }
+}
+
+// ----------------- BATTLEMETRICS LOOKUP -----------------
+/**
+ * Pick exact name matches (case-insensitive). If multiple, choose latest lastSeen.
+ * Returns { online, firstSeen, lastSeen, timePlayed, pickedName } or null if no exact match.
+ */
+function pickBestBMEntry(bmData, targetName) {
+    const data = Array.isArray(bmData?.data) ? bmData.data : [];
+    const exact = data.filter(d => {
+        const nm = d?.attributes?.name;
+        return typeof nm === "string" && nm.toLowerCase() === targetName.toLowerCase();
+    });
+    if (exact.length === 0) return null;
+
+    // Each item contains relationships.servers.data[0].meta for this filtered server
+    const withSeen = exact.map(d => {
+        const entries = d?.relationships?.servers?.data || [];
+        const onThis = entries.find(s => s?.id === BM_SERVER_ID || true); // already filtered to this server
+        const meta = onThis?.meta || {};
+        return {
+            entity: d,
+            lastSeen: meta.lastSeen ? new Date(meta.lastSeen).getTime() : -1,
+            meta
+        };
+    });
+
+    withSeen.sort((a, b) => (b.lastSeen - a.lastSeen));
+    const top = withSeen[0];
+    const m = top?.meta || {};
+    return {
+        online: !!m.online,
+        firstSeen: m.firstSeen || null,
+        lastSeen: m.lastSeen || null,
+        timePlayed: Number.isFinite(m.timePlayed) ? m.timePlayed : null,
+        pickedName: top?.entity?.attributes?.name || targetName
+    };
+}
+
+async function getBMForPlayerName(name) {
+    try {
+        const url = buildBMUrl(name);
+        const json = await fetchJSON(url);
+        return pickBestBMEntry(json, name); // null if no exact match
+    } catch (e) {
+        console.warn("BM fetch failed for", name, e);
+        return null;
+    }
 }
 
 function renderTeam(team) {
     if (!team) {
         teamSection.style.display = 'block';
-        teamBadge.textContent = 'No team'; teamBadge.className = 'badge err';
-        teamId.textContent = '—'; teamClan.textContent = ''; teamMeta.textContent = 'No team found for this player on this server.';
+        teamBadge.textContent = 'No team';
+        teamBadge.className = 'badge err';
+        teamId.textContent = '—';
+        teamClan.textContent = '';
+        teamMeta.textContent = 'No team found for this player on this server.';
         teamRank.textContent = teamRating.textContent = teamPVP.textContent = teamPVE.textContent = teamBallistics.textContent = teamGather.textContent = '—';
         emptyTeamTable();
         return;
     }
     teamSection.style.display = 'block';
-    teamBadge.textContent = 'OK'; teamBadge.className = 'badge ok';
+    teamBadge.textContent = 'OK';
+    teamBadge.className = 'badge ok';
     teamId.textContent = team.TeamID || '—';
     teamClan.textContent = team.ClanTag ? `(${team.ClanTag})` : '';
     teamMeta.textContent = `Team Members: ${team.SteamIDs?.length || 0} (Last updated ${new Date(team.LastUpdated).toLocaleString()})`;
@@ -81,15 +166,20 @@ function renderTeam(team) {
     teamBallistics.textContent = rk.BallisticsPerf ?? '—';
     teamGather.textContent = rk.GatherPerf ?? '—';
 
-    const members = Array.isArray(team.TeamPlayerData) ? team.TeamPlayerData : [];
+    let members = Array.isArray(team.TeamPlayerData) ? team.TeamPlayerData : [];
     if (!members.length) { emptyTeamTable(); return; }
+    members = members.sort((a, b) => (b.TimePlayed || 0) - (a.TimePlayed || 0));
+
     tblTeam.innerHTML = '';
+
     for (const m of members) {
-        const avatar = m?.User?.Avatar?.avatarMedium || m?.User?.Avatar?.avatar || m?.User?.Avatar?.avatarFull || '';
+        const avatar = m?.User?.Avatar?.avatarFull || m?.User?.Avatar?.avatar || m?.User?.Avatar?.avatarMedium || '';
         const isOnline = "unknown"; // "unknown" | "online" | "offline"
         const statusDot = `<span class="status-dot ${isOnline}"></span>`;
         const mrk = m?.Rankings || {};
+        const playerRating = mrk.Rating;
         const v = (x) => (x ?? 0);
+        const rowId = `row-${m.SteamID || Math.random().toString(36).slice(2)}`;
 
         const ratingBlock = `
             <div class="group" style="margin-top:6px">
@@ -143,19 +233,23 @@ function renderTeam(team) {
                 </div>
                 <span class="pill sulfur"><b>Sulfur</b>&nbsp;${v(m.Sulfur)}</span>
             </div>`;
-        
+
         const playerBlock = `
             <div class="player">
                 ${avatar ? `<img class="avatar" src="${avatar}" alt="">` : ''}
                 <div>
                     <div class="playername">${statusDot}${m.Name || '—'}</div>
                     <div class="sub steam">${m.SteamID || '—'}</div>
-                    <div class="sub">Rating: ${mrk.Rating ?? '—'}</div>
                     <div class="sub">KDR: ${v(m.KDR)}</div>
+                    <div class="sub bm bm-first">First seen: <span class="bm-first-val">…</span></div>
+                    <div class="sub bm bm-last">Last seen: <span class="bm-last-val">…</span></div>
+                    <div class="sub bm bm-played">Played: <span class="bm-played-val">…</span></div>
                 </div>
             </div>`;
 
         const tr = document.createElement('tr');
+        tr.id = rowId;
+        tr.dataset.playerName = m.Name || "";
         tr.innerHTML = `
             <td>${playerBlock}</td>
             <td>${pvpBlock}</td>
@@ -164,13 +258,56 @@ function renderTeam(team) {
             <td>${fmtTime(m.TimePlayed)}</td>`;
         tblTeam.appendChild(tr);
     }
+
+    // Enrich rows with BattleMetrics data (sequential w/ small delay)
+    (async () => {
+        const rows = Array.from(tblTeam.querySelectorAll("tr"));
+        for (const row of rows) {
+            const name = row.dataset.playerName?.trim();
+            if (!name) continue;
+
+            const dot = row.querySelector(".status-dot");
+            const firstEl = row.querySelector(".bm-first-val");
+            const lastEl = row.querySelector(".bm-last-val");
+            const playedEl = row.querySelector(".bm-played-val");
+
+            try {
+                const bm = await getBMForPlayerName(name);
+
+                if (!bm) {
+                    // no exact match found
+                    dot?.classList.remove("online", "offline", "unknown");
+                    dot?.classList.add("unknown");
+                    if (firstEl) firstEl.textContent = "—";
+                    if (lastEl) lastEl.textContent = "—";
+                    if (playedEl) playedEl.textContent = "—";
+                } else {
+                    dot?.classList.remove("online", "offline", "unknown");
+                    dot?.classList.add(bm.online ? "online" : "offline");
+                    if (firstEl) firstEl.textContent = fmtISO(bm.firstSeen);
+                    if (lastEl) lastEl.textContent = fmtISO(bm.lastSeen);
+                    if (playedEl) playedEl.textContent = bm.timePlayed != null ? fmtTime(bm.timePlayed) : "—";
+                }
+            } catch (e) {
+                console.warn("BM enrich failed for", name, e);
+            }
+
+            // gentle delay
+            await new Promise(r => setTimeout(r, 10));
+        }
+    })();
 }
 
 async function fetchSteamAndTeam() {
     const name = playerInput.value.trim();
-    if (!name) { setStatus('Please enter a player name.', true); playerInput.focus(); return; }
+    if (!name) {
+        setStatus('Please enter a player name.', true);
+        playerInput.focus();
+        return;
+    }
     setStatus('Looking up SteamID…');
-    showSteam(null); teamSection.style.display = 'none';
+    showSteam(null); 
+    teamSection.style.display = 'none';
     try {
         const res = await fetch(buildPlayerUrl(name), { headers: { 'Accept': 'application/json' } });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -189,10 +326,34 @@ async function fetchSteamAndTeam() {
         const team = Array.isArray(tData?.leaderboard) ? tData.leaderboard[0] : null;
         renderTeam(team);
         setStatus('');
-    } catch (e) { console.error(e); setStatus(`Failed: ${e.message || e}`, true); renderTeam(null); }
+    } catch (e) {
+        console.error(e);
+        setStatus(`Failed: ${e.message || e}`, true);
+        renderTeam(null);
+    }
 }
 
 fetchBtn.addEventListener('click', fetchSteamAndTeam);
-clearBtn.addEventListener('click', () => { setStatus(''); showSteam(null); teamSection.style.display = 'none'; playerInput.value = ''; playerInput.focus(); });
-playerInput.addEventListener('keydown', e => { if (e.key === 'Enter') fetchSteamAndTeam(); });
-copyBtn.addEventListener('click', async () => { const t = steamVal.textContent.trim(); if (!t) return; try { await navigator.clipboard.writeText(t); copyBtn.textContent = 'Copied!'; setTimeout(() => copyBtn.textContent = 'Copy', 900); } catch { setStatus('Copy failed. You can select the SteamID manually.', true); } });
+
+clearBtn.addEventListener('click', () => {
+    setStatus('');
+    showSteam(null);
+    teamSection.style.display = 'none';
+    playerInput.value = ''; playerInput.focus();
+});
+
+playerInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') fetchSteamAndTeam();
+});
+
+copyBtn.addEventListener('click', async () => {
+    const t = steamVal.textContent.trim();
+    if (!t) return;
+    try {
+        await navigator.clipboard.writeText(t);
+        copyBtn.textContent = 'Copied!';
+        setTimeout(() => copyBtn.textContent = 'Copy', 900);
+    } catch {
+        setStatus('Copy failed. You can select the SteamID manually.', true);
+    }
+});
