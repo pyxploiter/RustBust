@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RankEval Leaderboards Viewer</title>
+  <style>
+    :root {
+      --bg: #0f1222;
+      --card: #151935;
+      --muted: #8b93bd;
+      --text: #e8ecff;
+      --accent: #6ea8fe;
+      --ok: #3ddc97;
+      --err: #ff6b6b;
+      --warn: #ffd166;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--text);
+      background: radial-gradient(1200px 800px at 10% 0%, #1a1f47 0%, var(--bg) 60%), var(--bg);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 0 16px 80px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    h1 { font-size: 22px; margin: 0; font-weight: 700; letter-spacing: 0.2px; }
+    .subtitle { color: var(--muted); font-size: 13px; margin-top: 4px; }
+
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+
+    .controls.card { padding: 14px; display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: center; }
+    label { font-size: 12px; color: var(--muted); }
+
+    .input {
+      display: grid; gap: 6px;
+    }
+    input[type="text"] {
+      width: 100%;
+      background: #0e1330;
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 12px 12px;
+      border-radius: 10px;
+      outline: none;
+      font-size: 14px;
+    }
+    input[type="text"]:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(110,168,254,0.25); }
+
+    button {
+      appearance: none; border: 0; cursor: pointer;
+      padding: 12px 16px; border-radius: 10px;
+      font-weight: 600; letter-spacing: .2px;
+    }
+    .btn-primary { background: var(--accent); color: #0a0f2b; }
+    .btn-ghost { background: rgba(255,255,255,0.08); color: var(--text); }
+    .btn-small { padding: 8px 10px; font-size: 12px; }
+
+    .grid {
+      margin-top: 18px;
+      display: grid; gap: 16px;
+      grid-template-columns: repeat(12, 1fr);
+    }
+    .col-4 { grid-column: span 12; }
+    @media (min-width: 900px) { .col-4 { grid-column: span 4; } }
+
+    .panel { padding: 12px; display: grid; grid-template-rows: auto 1fr; gap: 10px; height: 100%; }
+    .panel header { margin: 0; }
+
+    .title-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .badge { padding: 4px 8px; border-radius: 100px; font-size: 11px; color: #0a0f2b; font-weight: 700; }
+    .badge.ok { background: var(--ok); }
+    .badge.err { background: var(--err); }
+    .badge.warn { background: var(--warn); }
+
+    .status { font-size: 12px; color: var(--muted); }
+
+    .pre-wrap {
+      background: #0b0f24;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      padding: 10px;
+      font-family: var(--mono);
+      font-size: 12px;
+      line-height: 1.5;
+      overflow: auto;
+      white-space: pre;
+      tab-size: 2;
+      max-height: 420px;
+    }
+
+    .row { display: flex; gap: 8px; align-items: center; }
+    .muted { color: var(--muted); font-size: 12px; }
+
+    .skeleton {
+      height: 12px; width: 100%; border-radius: 6px; background: linear-gradient(90deg, #0e1330 25%, #141a3f 37%, #0e1330 63%);
+      background-size: 400% 100%; animation: shimmer 1.4s infinite ease-in-out;
+    }
+    @keyframes shimmer { 0% {background-position: 100% 0} 100% {background-position: 0 0} }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>RankEval Leaderboards Viewer</h1>
+        <div class="subtitle">Enter a player name to fetch <b>PVE</b>, <b>PVP</b>, and <b>Overall</b> leaderboards for a fixed server.</div>
+      </div>
+    </header>
+
+    <section class="controls card">
+      <div class="input">
+        <label for="player">Player Name</label>
+        <input id="player" type="text" placeholder="e.g. pyxploiter" value="pyxploiter" />
+      </div>
+      <button id="fetchBtn" class="btn-primary">Fetch Leaderboards</button>
+      <button id="clearBtn" class="btn-ghost" title="Clear results">Clear</button>
+    </section>
+
+    <div class="grid">
+      <div class="col-4">
+        <div class="panel card">
+          <div class="title-row">
+            <h3 style="margin:0">PVE</h3>
+            <div class="row">
+              <span id="pveBadge" class="badge warn">—</span>
+              <button class="btn-ghost btn-small" id="copyPVE">Copy JSON</button>
+            </div>
+          </div>
+          <div class="status" id="pveStatus">Idle</div>
+          <pre id="pvePre" class="pre-wrap"><span class="muted">No data yet. Click "Fetch Leaderboards".</span></pre>
+        </div>
+      </div>
+
+      <div class="col-4">
+        <div class="panel card">
+          <div class="title-row">
+            <h3 style="margin:0">PVP</h3>
+            <div class="row">
+              <span id="pvpBadge" class="badge warn">—</span>
+              <button class="btn-ghost btn-small" id="copyPVP">Copy JSON</button>
+            </div>
+          </div>
+          <div class="status" id="pvpStatus">Idle</div>
+          <pre id="pvpPre" class="pre-wrap"><span class="muted">No data yet. Click "Fetch Leaderboards".</span></pre>
+        </div>
+      </div>
+
+      <div class="col-4">
+        <div class="panel card">
+          <div class="title-row">
+            <h3 style="margin:0">Overall</h3>
+            <div class="row">
+              <span id="overallBadge" class="badge warn">—</span>
+              <button class="btn-ghost btn-small" id="copyOverall">Copy JSON</button>
+            </div>
+          </div>
+          <div class="status" id="overallStatus">Idle</div>
+          <pre id="overallPre" class="pre-wrap"><span class="muted">No data yet. Click "Fetch Leaderboards".</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <p class="subtitle" style="margin-top:16px">Server is hardcoded to <code>66af4fbe9dd0740a80453310</code>. Source: <code>https://api.rankeval.gg/api/getleaderboards</code></p>
+  </div>
+
+  <script>
+    // ==== CONFIG (hardcoded per request) ====
+    const PLAYER_API = "https://api.rankeval.gg/api/getleaderboards";
+    const SERVER_ID  = "66af4fbe9dd0740a80453310";
+    const TYPE = {
+      PVE: "PVELeaderboard",
+      PVP: "PVPLeaderboard",
+      Overall: "Leaderboard",
+    };
+
+    // ==== DOM refs ====
+    const $ = (s) => document.querySelector(s);
+    const playerInput = $("#player");
+    const fetchBtn = $("#fetchBtn");
+    const clearBtn = $("#clearBtn");
+
+    const panels = {
+      PVE:   { pre: $("#pvePre"), status: $("#pveStatus"), badge: $("#pveBadge"), copy: $("#copyPVE") },
+      PVP:   { pre: $("#pvpPre"), status: $("#pvpStatus"), badge: $("#pvpBadge"), copy: $("#copyPVP") },
+      Overall: { pre: $("#overallPre"), status: $("#overallStatus"), badge: $("#overallBadge"), copy: $("#copyOverall") },
+    };
+
+    function buildUrl(typeKey, playerName) {
+      const q = encodeURIComponent(playerName.trim());
+      const t = TYPE[typeKey];
+      return `${PLAYER_API}?q=${q}&ServerFilter=${SERVER_ID}&Type=${t}`;
+    }
+
+    function setLoading(panel) {
+      panel.status.textContent = "Loading…";
+      panel.badge.textContent = "…";
+      panel.badge.className = "badge warn";
+      panel.pre.innerHTML = "";
+      for (let i = 0; i < 12; i++) {
+        const sk = document.createElement('div');
+        sk.className = 'skeleton';
+        sk.style.margin = '6px 0';
+        panel.pre.appendChild(sk);
+      }
+    }
+
+    function render(panel, data, url, ms) {
+      panel.status.textContent = `Fetched in ${ms.toFixed(0)} ms · ${new Date().toLocaleTimeString()}`;
+      panel.badge.textContent = 'OK';
+      panel.badge.className = 'badge ok';
+      const pretty = JSON.stringify(data, null, 2);
+      panel.pre.textContent = pretty;
+      panel.pre.dataset.raw = pretty; // for copy
+      panel.pre.title = url;
+    }
+
+    function renderError(panel, err, url) {
+      panel.status.textContent = `Error at ${new Date().toLocaleTimeString()}`;
+      panel.badge.textContent = 'ERR';
+      panel.badge.className = 'badge err';
+      const msg = (err && err.message) ? err.message : String(err);
+      panel.pre.textContent = JSON.stringify({ error: msg, url }, null, 2);
+      panel.pre.dataset.raw = panel.pre.textContent;
+      console.error(err);
+    }
+
+    async function fetchOne(typeKey, playerName) {
+      const panel = panels[typeKey];
+      const url = buildUrl(typeKey, playerName);
+      setLoading(panel);
+      const t0 = performance.now();
+      try {
+        const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+        if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
+        const data = await res.json().catch(() => ({}));
+        const t1 = performance.now();
+        render(panel, data, url, t1 - t0);
+      } catch (err) {
+        renderError(panel, err, url);
+      }
+    }
+
+    async function fetchAll() {
+      const name = playerInput.value || '';
+      if (!name.trim()) {
+        playerInput.focus();
+        playerInput.setAttribute('aria-invalid', 'true');
+        return;
+      }
+      await Promise.all([
+        fetchOne('PVE', name),
+        fetchOne('PVP', name),
+        fetchOne('Overall', name),
+      ]);
+    }
+
+    function clearAll() {
+      Object.values(panels).forEach(p => {
+        p.status.textContent = 'Idle';
+        p.badge.textContent = '—';
+        p.badge.className = 'badge warn';
+        p.pre.innerHTML = '<span class="muted">No data yet. Click "Fetch Leaderboards".</span>';
+        p.pre.dataset.raw = '';
+      })
+    }
+
+    function wireCopy(btn, pre) {
+      btn.addEventListener('click', async () => {
+        const text = pre.dataset.raw || pre.textContent || '';
+        try {
+          await navigator.clipboard.writeText(text);
+          const old = btn.textContent; btn.textContent = 'Copied!';
+          setTimeout(() => (btn.textContent = old), 900);
+        } catch (e) {
+          alert('Copy failed. You can manually select the JSON and copy.');
+        }
+      });
+    }
+
+    // Events
+    fetchBtn.addEventListener('click', fetchAll);
+    clearBtn.addEventListener('click', clearAll);
+    playerInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') fetchAll(); });
+
+    // Copy buttons
+    wireCopy(panels.PVE.copy, panels.PVE.pre);
+    wireCopy(panels.PVP.copy, panels.PVP.pre);
+    wireCopy(panels.Overall.copy, panels.Overall.pre);
+
+    // First load for convenience
+    fetchAll();
+  </script>
+</body>
+</html>
