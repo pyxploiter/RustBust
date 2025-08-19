@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RankEval Leaderboards Viewer</title>
+  <title>RankEval Leaderboards • Dashboard</title>
   <style>
     :root {
       --bg: #0f1222;
@@ -16,117 +16,83 @@
       --warn: #ffd166;
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       --radius: 14px;
+      --chip: rgba(255,255,255,0.08);
+      --tableStripe: rgba(255,255,255,0.04);
     }
     * { box-sizing: border-box; }
     html, body { height: 100%; }
     body {
       margin: 0;
-      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
       color: var(--text);
       background: radial-gradient(1200px 800px at 10% 0%, #1a1f47 0%, var(--bg) 60%), var(--bg);
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }
 
-    .container {
-      max-width: 1100px;
-      margin: 40px auto;
-      padding: 0 16px 80px;
-    }
-
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 18px;
-    }
-    h1 { font-size: 22px; margin: 0; font-weight: 700; letter-spacing: 0.2px; }
+    .container { max-width: 1200px; margin: 32px auto 72px; padding: 0 16px; }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+    h1 { font-size: 24px; margin: 0; font-weight: 800; letter-spacing: .2px; }
     .subtitle { color: var(--muted); font-size: 13px; margin-top: 4px; }
 
-    .card {
-      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: var(--radius);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05);
-    }
-
+    .card { background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius); box-shadow: 0 10px 30px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05); }
     .controls.card { padding: 14px; display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: center; }
-    label { font-size: 12px; color: var(--muted); }
 
-    .input {
-      display: grid; gap: 6px;
-    }
-    input[type="text"] {
-      width: 100%;
-      background: #0e1330;
-      color: var(--text);
-      border: 1px solid rgba(255,255,255,0.1);
-      padding: 12px 12px;
-      border-radius: 10px;
-      outline: none;
-      font-size: 14px;
-    }
+    label { font-size: 12px; color: var(--muted); }
+    .input { display: grid; gap: 6px; }
+    input[type="text"] { width: 100%; background: #0e1330; color: var(--text); border: 1px solid rgba(255,255,255,0.1); padding: 12px 12px; border-radius: 10px; outline: none; font-size: 14px; }
     input[type="text"]:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(110,168,254,0.25); }
 
-    button {
-      appearance: none; border: 0; cursor: pointer;
-      padding: 12px 16px; border-radius: 10px;
-      font-weight: 600; letter-spacing: .2px;
-    }
+    button { appearance: none; border: 0; cursor: pointer; padding: 12px 16px; border-radius: 10px; font-weight: 600; letter-spacing: .2px; }
     .btn-primary { background: var(--accent); color: #0a0f2b; }
     .btn-ghost { background: rgba(255,255,255,0.08); color: var(--text); }
     .btn-small { padding: 8px 10px; font-size: 12px; }
 
-    .grid {
-      margin-top: 18px;
-      display: grid; gap: 16px;
-      grid-template-columns: repeat(12, 1fr);
-    }
-    .col-4 { grid-column: span 12; }
-    @media (min-width: 900px) { .col-4 { grid-column: span 4; } }
+    .grid { display: grid; gap: 16px; }
 
-    .panel { padding: 12px; display: grid; grid-template-rows: auto 1fr; gap: 10px; height: 100%; }
-    .panel header { margin: 0; }
+    /* SERVER SUMMARY */
+    .server-grid { margin-top: 18px; display: grid; gap: 14px; grid-template-columns: repeat(12, 1fr); }
+    .col-12 { grid-column: span 12; }
+    .col-6 { grid-column: span 12; }
+    @media (min-width: 900px) { .col-6 { grid-column: span 6; } }
 
-    .title-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .server-card { padding: 14px; display: grid; gap: 10px; }
+    .kpis { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+    .kpi { background: var(--chip); padding: 10px; border-radius: 10px; text-align: center; }
+    .kpi .label { font-size: 11px; color: var(--muted); }
+    .kpi .value { font-weight: 800; font-size: 16px; }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip { background: var(--chip); border: 1px solid rgba(255,255,255,0.1); padding: 6px 10px; border-radius: 999px; font-size: 12px; }
+
+    /* TABLES */
+    .section { margin-top: 18px; }
+    .section h3 { margin: 0 0 10px; font-size: 16px; }
+    .table-card { padding: 0; overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th { text-align: left; font-weight: 700; font-size: 12px; color: var(--muted); padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02); position: sticky; top: 0; z-index: 1; }
+    tbody td { padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    tbody tr:nth-child(even) { background: var(--tableStripe); }
+
+    .player { display: flex; align-items: center; gap: 10px; }
+    .avatar { width: 28px; height: 28px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.12); object-fit: cover; }
+    .steam { color: var(--muted); font-size: 11px; }
+
+    .status { font-size: 12px; color: var(--muted); }
     .badge { padding: 4px 8px; border-radius: 100px; font-size: 11px; color: #0a0f2b; font-weight: 700; }
     .badge.ok { background: var(--ok); }
     .badge.err { background: var(--err); }
     .badge.warn { background: var(--warn); }
 
-    .status { font-size: 12px; color: var(--muted); }
-
-    .pre-wrap {
-      background: #0b0f24;
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 10px;
-      padding: 10px;
-      font-family: var(--mono);
-      font-size: 12px;
-      line-height: 1.5;
-      overflow: auto;
-      white-space: pre;
-      tab-size: 2;
-      max-height: 420px;
-    }
-
-    .row { display: flex; gap: 8px; align-items: center; }
-    .muted { color: var(--muted); font-size: 12px; }
-
-    .skeleton {
-      height: 12px; width: 100%; border-radius: 6px; background: linear-gradient(90deg, #0e1330 25%, #141a3f 37%, #0e1330 63%);
-      background-size: 400% 100%; animation: shimmer 1.4s infinite ease-in-out;
-    }
-    @keyframes shimmer { 0% {background-position: 100% 0} 100% {background-position: 0 0} }
+    .footer-note { color: var(--muted); font-size: 12px; margin-top: 10px; }
   </style>
 </head>
 <body>
   <div class="container">
     <header>
       <div>
-        <h1>RankEval Leaderboards Viewer</h1>
-        <div class="subtitle">Enter a player name to fetch <b>PVE</b>, <b>PVP</b>, and <b>Overall</b> leaderboards for a fixed server.</div>
+        <h1>RankEval Leaderboards • Dashboard</h1>
+        <div class="subtitle">Server is fixed to <code>66af4fbe9dd0740a80453310</code>. Enter a player name to view their PVE / PVP / Overall stats.</div>
       </div>
     </header>
 
@@ -139,74 +105,133 @@
       <button id="clearBtn" class="btn-ghost" title="Clear results">Clear</button>
     </section>
 
-    <div class="grid">
-      <div class="col-4">
-        <div class="panel card">
-          <div class="title-row">
-            <h3 style="margin:0">PVE</h3>
-            <div class="row">
-              <span id="pveBadge" class="badge warn">—</span>
-              <button class="btn-ghost btn-small" id="copyPVE">Copy JSON</button>
+    <!-- SERVER SUMMARY (once) -->
+    <section class="server-grid">
+      <div class="col-12">
+        <div class="server-card card" id="serverCard">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+            <div>
+              <div class="subtitle" id="serverMessage">Server: <b>—</b></div>
+              <div class="status" id="serverMeta">IP • Players • Presets • Last updates</div>
             </div>
+            <span id="serverBadge" class="badge warn">—</span>
           </div>
-          <div class="status" id="pveStatus">Idle</div>
-          <pre id="pvePre" class="pre-wrap"><span class="muted">No data yet. Click "Fetch Leaderboards".</span></pre>
+          <div class="kpis">
+            <div class="kpi"><div class="label">Server Name</div><div class="value" id="svName">—</div></div>
+            <div class="kpi"><div class="label">Address</div><div class="value" id="svAddr">—</div></div>
+            <div class="kpi"><div class="label">Players</div><div class="value" id="svPlayers">—</div></div>
+            <div class="kpi"><div class="label">LT Last Update</div><div class="value" id="svLTUpd">—</div></div>
+            <div class="kpi"><div class="label">LB Last Update</div><div class="value" id="svLBUpd">—</div></div>
+            <div class="kpi"><div class="label">Team Last Update</div><div class="value" id="svTeamUpd">—</div></div>
+          </div>
+          <div class="chips" id="svPresets"></div>
         </div>
       </div>
+    </section>
 
-      <div class="col-4">
-        <div class="panel card">
-          <div class="title-row">
-            <h3 style="margin:0">PVP</h3>
-            <div class="row">
-              <span id="pvpBadge" class="badge warn">—</span>
-              <button class="btn-ghost btn-small" id="copyPVP">Copy JSON</button>
-            </div>
-          </div>
-          <div class="status" id="pvpStatus">Idle</div>
-          <pre id="pvpPre" class="pre-wrap"><span class="muted">No data yet. Click "Fetch Leaderboards".</span></pre>
-        </div>
+    <!-- SECTIONS -->
+    <section class="section">
+      <h3>PVE</h3>
+      <div class="table-card card">
+        <table id="tblPVE">
+          <thead>
+            <tr>
+              <th>Player</th>
+              <th>SteamID</th>
+              <th>PVE Kills</th>
+              <th>NPC Kills</th>
+              <th>HQM</th>
+              <th>Metal</th>
+              <th>Stone</th>
+              <th>Sulfur</th>
+              <th>Wood</th>
+              <th>Upgrades</th>
+              <th>PVE Perf</th>
+              <th>Rank</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
       </div>
+    </section>
 
-      <div class="col-4">
-        <div class="panel card">
-          <div class="title-row">
-            <h3 style="margin:0">Overall</h3>
-            <div class="row">
-              <span id="overallBadge" class="badge warn">—</span>
-              <button class="btn-ghost btn-small" id="copyOverall">Copy JSON</button>
-            </div>
-          </div>
-          <div class="status" id="overallStatus">Idle</div>
-          <pre id="overallPre" class="pre-wrap"><span class="muted">No data yet. Click "Fetch Leaderboards".</span></pre>
-        </div>
+    <section class="section">
+      <h3>PVP</h3>
+      <div class="table-card card">
+        <table id="tblPVP">
+          <thead>
+            <tr>
+              <th>Player</th>
+              <th>SteamID</th>
+              <th>Kills</th>
+              <th>Deaths</th>
+              <th>KDR</th>
+              <th>Bullets</th>
+              <th>Arrows</th>
+              <th>Explosives</th>
+              <th>Rockets</th>
+              <th>PVP Perf</th>
+              <th>Rank</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
       </div>
-    </div>
+    </section>
 
-    <p class="subtitle" style="margin-top:16px">Server is hardcoded to <code>66af4fbe9dd0740a80453310</code>. Source: <code>https://api.rankeval.gg/api/getleaderboards</code></p>
+    <section class="section">
+      <h3>Overall</h3>
+      <div class="table-card card">
+        <table id="tblOverall">
+          <thead>
+            <tr>
+              <th>Player</th>
+              <th>SteamID</th>
+              <th>Rating</th>
+              <th>Rank</th>
+              <th>PVP Perf</th>
+              <th>PVE Perf</th>
+              <th>Ballistics</th>
+              <th>Gather</th>
+              <th>Time Played</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="footer-note">Tip: Click "Fetch Leaderboards" to refresh tables. Avatar pulled from the Steam URL in the payload.</div>
+    </section>
   </div>
 
   <script>
     // ==== CONFIG (hardcoded per request) ====
     const PLAYER_API = "https://api.rankeval.gg/api/getleaderboards";
     const SERVER_ID  = "66af4fbe9dd0740a80453310";
-    const TYPE = {
-      PVE: "PVELeaderboard",
-      PVP: "PVPLeaderboard",
-      Overall: "Leaderboard",
-    };
+    const TYPE = { PVE: "PVELeaderboard", PVP: "PVPLeaderboard", Overall: "Leaderboard" };
 
-    // ==== DOM refs ====
     const $ = (s) => document.querySelector(s);
+
+    // Controls
     const playerInput = $("#player");
     const fetchBtn = $("#fetchBtn");
     const clearBtn = $("#clearBtn");
 
-    const panels = {
-      PVE:   { pre: $("#pvePre"), status: $("#pveStatus"), badge: $("#pveBadge"), copy: $("#copyPVE") },
-      PVP:   { pre: $("#pvpPre"), status: $("#pvpStatus"), badge: $("#pvpBadge"), copy: $("#copyPVP") },
-      Overall: { pre: $("#overallPre"), status: $("#overallStatus"), badge: $("#overallBadge"), copy: $("#copyOverall") },
-    };
+    // Server summary refs
+    const svName = $("#svName");
+    const svAddr = $("#svAddr");
+    const svPlayers = $("#svPlayers");
+    const svLTUpd = $("#svLTUpd");
+    const svLBUpd = $("#svLBUpd");
+    const svTeamUpd = $("#svTeamUpd");
+    const svPresets = $("#svPresets");
+    const serverBadge = $("#serverBadge");
+    const serverMessage = $("#serverMessage");
+    const serverMeta = $("#serverMeta");
+
+    // Tables
+    const tblPVE = $("#tblPVE tbody");
+    const tblPVP = $("#tblPVP tbody");
+    const tblOverall = $("#tblOverall tbody");
 
     function buildUrl(typeKey, playerName) {
       const q = encodeURIComponent(playerName.trim());
@@ -214,90 +239,162 @@
       return `${PLAYER_API}?q=${q}&ServerFilter=${SERVER_ID}&Type=${t}`;
     }
 
-    function setLoading(panel) {
-      panel.status.textContent = "Loading…";
-      panel.badge.textContent = "…";
-      panel.badge.className = "badge warn";
-      panel.pre.innerHTML = "";
-      for (let i = 0; i < 12; i++) {
-        const sk = document.createElement('div');
-        sk.className = 'skeleton';
-        sk.style.margin = '6px 0';
-        panel.pre.appendChild(sk);
+    function fmtDate(s) {
+      if (!s) return '—';
+      try { return new Date(s).toLocaleString(); } catch { return s; }
+    }
+
+    function fmtTimePlayed(seconds) {
+      if (!seconds && seconds !== 0) return '—';
+      const h = Math.floor(seconds / 3600);
+      const m = Math.floor((seconds % 3600) / 60);
+      return `${h}h ${m}m`;
+    }
+
+    function setServerSummary(serverData) {
+      if (!serverData) return;
+      serverBadge.textContent = 'OK';
+      serverBadge.className = 'badge ok';
+      svName.textContent = serverData.ServerName || '—';
+      svAddr.textContent = `${serverData.ServerIP || '—'}:${serverData.ServerPort || '—'}`;
+      svPlayers.textContent = `${serverData.PlayerCount ?? '—'} / ${serverData.PlayerMax ?? '—'}`;
+      svLTUpd.textContent = fmtDate(serverData.LTLeaderboard?.lastUpdate);
+      svLBUpd.textContent = fmtDate(serverData.Leaderboard?.lastUpdate);
+      svTeamUpd.textContent = fmtDate(serverData.TeamLeaderboard?.lastUpdate);
+
+      svPresets.innerHTML = '';
+      (serverData.Preset || []).forEach(p => {
+        const c = document.createElement('div'); c.className = 'chip'; c.textContent = p; svPresets.appendChild(c);
+      });
+
+      serverMessage.innerHTML = `Server: <b>${serverData.ServerName || '—'}</b>`;
+      serverMeta.textContent = `${serverData.ServerIP || '—'}:${serverData.ServerPort || '—'} • Players ${serverData.PlayerCount || 0}/${serverData.PlayerMax || 0} • Presets ${(serverData.Preset||[]).join(', ')}`;
+    }
+
+    function playerCell(user, name) {
+      const avatar = user?.Avatar?.avatarMedium || user?.Avatar?.avatar || user?.Avatar?.avatarFull;
+      const img = `<img class="avatar" src="${avatar || ''}" alt="avatar" onerror="this.style.visibility='hidden'">`;
+      return `<div class="player">${img}<div><div>${name || '—'}</div></div></div>`;
+    }
+
+    function setEmptyRow(tbody, colspan, text='No results') {
+      tbody.innerHTML = `<tr><td colspan="${colspan}" class="status" style="text-align:center">${text}</td></tr>`;
+    }
+
+    function renderPVE(rows) {
+      const tb = tblPVE; tb.innerHTML = '';
+      if (!rows || !rows.length) return setEmptyRow(tb, 12);
+      for (const r of rows) {
+        const perf = r.Rankings?.PVEPerf ?? '—';
+        const rank = r.Rankings?.Rank ?? '—';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${playerCell(r.User, r.Name)}</td>
+          <td class="steam">${r.SteamID || '—'}</td>
+          <td>${r.PVEKills ?? 0}</td>
+          <td>${r.NPCKills ?? 0}</td>
+          <td>${r.HQM ?? 0}</td>
+          <td>${r.Metal ?? 0}</td>
+          <td>${r.Stone ?? 0}</td>
+          <td>${r.Sulfur ?? 0}</td>
+          <td>${r.Wood ?? 0}</td>
+          <td>${r.StructuresUpgraded ?? 0}</td>
+          <td>${perf}</td>
+          <td>${rank}</td>
+        `;
+        tb.appendChild(tr);
       }
     }
 
-    function render(panel, data, url, ms) {
-      panel.status.textContent = `Fetched in ${ms.toFixed(0)} ms · ${new Date().toLocaleTimeString()}`;
-      panel.badge.textContent = 'OK';
-      panel.badge.className = 'badge ok';
-      const pretty = JSON.stringify(data, null, 2);
-      panel.pre.textContent = pretty;
-      panel.pre.dataset.raw = pretty; // for copy
-      panel.pre.title = url;
-    }
-
-    function renderError(panel, err, url) {
-      panel.status.textContent = `Error at ${new Date().toLocaleTimeString()}`;
-      panel.badge.textContent = 'ERR';
-      panel.badge.className = 'badge err';
-      const msg = (err && err.message) ? err.message : String(err);
-      panel.pre.textContent = JSON.stringify({ error: msg, url }, null, 2);
-      panel.pre.dataset.raw = panel.pre.textContent;
-      console.error(err);
-    }
-
-    async function fetchOne(typeKey, playerName) {
-      const panel = panels[typeKey];
-      const url = buildUrl(typeKey, playerName);
-      setLoading(panel);
-      const t0 = performance.now();
-      try {
-        const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
-        if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
-        const data = await res.json().catch(() => ({}));
-        const t1 = performance.now();
-        render(panel, data, url, t1 - t0);
-      } catch (err) {
-        renderError(panel, err, url);
+    function renderPVP(rows) {
+      const tb = tblPVP; tb.innerHTML = '';
+      if (!rows || !rows.length) return setEmptyRow(tb, 11);
+      for (const r of rows) {
+        const perf = r.Rankings?.PVPPerf ?? '—';
+        const rank = r.Rankings?.Rank ?? '—';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${playerCell(r.User, r.Name)}</td>
+          <td class="steam">${r.SteamID || '—'}</td>
+          <td>${r.PVPKills ?? 0}</td>
+          <td>${r.Deaths ?? 0}</td>
+          <td>${(r.KDR ?? 0)}</td>
+          <td>${r.BulletsFired ?? 0}</td>
+          <td>${r.ArrowsFired ?? 0}</td>
+          <td>${r.ExplosivesThrown ?? 0}</td>
+          <td>${r.RocketsLaunched ?? 0}</td>
+          <td>${perf}</td>
+          <td>${rank}</td>
+        `;
+        tb.appendChild(tr);
       }
     }
 
-    async function fetchAll() {
-      const name = playerInput.value || '';
-      if (!name.trim()) {
-        playerInput.focus();
-        playerInput.setAttribute('aria-invalid', 'true');
-        return;
+    function renderOverall(rows) {
+      const tb = tblOverall; tb.innerHTML = '';
+      if (!rows || !rows.length) return setEmptyRow(tb, 9);
+      for (const r of rows) {
+        const rk = r.Rankings || {};
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${playerCell(r.User, r.Name)}</td>
+          <td class="steam">${r.SteamID || '—'}</td>
+          <td>${rk.Rating ?? '—'}</td>
+          <td>${rk.Rank ?? '—'}</td>
+          <td>${rk.PVPPerf ?? '—'}</td>
+          <td>${rk.PVEPerf ?? '—'}</td>
+          <td>${rk.BallisticsPerf ?? '—'}</td>
+          <td>${rk.GatherPerf ?? '—'}</td>
+          <td>${fmtTimePlayed(r.TimePlayed)}</td>
+        `;
+        tb.appendChild(tr);
       }
-      await Promise.all([
-        fetchOne('PVE', name),
-        fetchOne('PVP', name),
-        fetchOne('Overall', name),
-      ]);
     }
 
     function clearAll() {
-      Object.values(panels).forEach(p => {
-        p.status.textContent = 'Idle';
-        p.badge.textContent = '—';
-        p.badge.className = 'badge warn';
-        p.pre.innerHTML = '<span class="muted">No data yet. Click "Fetch Leaderboards".</span>';
-        p.pre.dataset.raw = '';
-      })
+      serverBadge.textContent = '—'; serverBadge.className = 'badge warn';
+      svName.textContent = '—'; svAddr.textContent = '—'; svPlayers.textContent = '—';
+      svLTUpd.textContent = '—'; svLBUpd.textContent = '—'; svTeamUpd.textContent = '—';
+      svPresets.innerHTML = '';
+      serverMessage.innerHTML = 'Server: <b>—</b>';
+      serverMeta.textContent = 'IP • Players • Presets • Last updates';
+      setEmptyRow(tblPVE, 12, 'No data');
+      setEmptyRow(tblPVP, 11, 'No data');
+      setEmptyRow(tblOverall, 9, 'No data');
     }
 
-    function wireCopy(btn, pre) {
-      btn.addEventListener('click', async () => {
-        const text = pre.dataset.raw || pre.textContent || '';
-        try {
-          await navigator.clipboard.writeText(text);
-          const old = btn.textContent; btn.textContent = 'Copied!';
-          setTimeout(() => (btn.textContent = old), 900);
-        } catch (e) {
-          alert('Copy failed. You can manually select the JSON and copy.');
-        }
-      });
+    async function fetchType(typeKey, name) {
+      const url = buildUrl(typeKey, name);
+      const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+      if (!res.ok) throw new Error(`${typeKey} HTTP ${res.status}`);
+      return res.json();
+    }
+
+    async function fetchAll() {
+      const name = playerInput.value.trim();
+      if (!name) { playerInput.focus(); return; }
+      clearAll();
+      try {
+        // Parallel fetches
+        const [pve, pvp, all] = await Promise.all([
+          fetchType('PVE', name),
+          fetchType('PVP', name),
+          fetchType('Overall', name),
+        ]);
+
+        // Server (generic) — prefer one that exists
+        const serverData = pve.serverData || pvp.serverData || all.serverData;
+        if (serverData) setServerSummary(serverData);
+
+        // Tables
+        renderPVE(pve.leaderboard || []);
+        renderPVP(pvp.leaderboard || []);
+        renderOverall(all.leaderboard || []);
+      } catch (err) {
+        serverBadge.textContent = 'ERR'; serverBadge.className = 'badge err';
+        serverMeta.textContent = String(err);
+        console.error(err);
+      }
     }
 
     // Events
@@ -305,12 +402,7 @@
     clearBtn.addEventListener('click', clearAll);
     playerInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') fetchAll(); });
 
-    // Copy buttons
-    wireCopy(panels.PVE.copy, panels.PVE.pre);
-    wireCopy(panels.PVP.copy, panels.PVP.pre);
-    wireCopy(panels.Overall.copy, panels.Overall.pre);
-
-    // First load for convenience
+    // Initial load
     fetchAll();
   </script>
 </body>
