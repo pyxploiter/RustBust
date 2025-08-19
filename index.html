@@ -15,19 +15,19 @@
 
     <section class="card controls">
       <div class="input">
-        <label for="player">Player Name</label>
+        <label for="player">Player Name / Steam ID</label>
         <input id="player" type="text" placeholder="e.g. pyxploiter" value="pyxploiter" />
       </div>
-      <button id="fetchBtn" class="btn-primary">Find Team</button>
+      <button id="fetchBtn" class="btn-primary">Search</button>
       <button id="clearBtn" class="btn-ghost">Clear</button>
     </section>
 
     <div id="out" class="card result" style="display:none">
       <div>
-        <div class="muted">SteamID (64-bit)</div>
+        <div class="muted">SteamID</div>
         <div id="steamVal" class="big">—</div>
       </div>
-      <div class="row">
+      <div class="row max-row">
         <button id="copyBtn" class="btn-ghost">Copy</button>
         <a id="steamLink"  target="_blank" rel="noopener"><button class="btn-ghost">Open Steam</button></a>
       </div>
@@ -36,7 +36,7 @@
 
     <!-- TEAM SECTION -->
     <section class="section" id="teamSection" style="display:none">
-      <h3>Team</h3>
+      <!-- <h3>Team</h3> -->
       <div class="card">
         <div class="team-head">
           <div>
@@ -60,9 +60,9 @@
           <thead>
             <tr>
               <th>Player</th>
-              <th>Rating & Perfs</th>
+              <!-- <th>Rating</th> -->
               <th>PVP</th>
-              <th>PVE & Vehicles</th>
+              <th>PVE</th>
               <th>Gather</th>
               <th>Time</th>
             </tr>

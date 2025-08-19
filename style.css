@@ -7,8 +7,8 @@
     --ok: #3ddc97;
     --err: #ff6b6b;
     --radius: 14px;
-    --chip: rgba(255, 255, 255, 0.08);
-    --stripe: rgba(255, 255, 255, 0.04)
+    --chip: rgba(255, 255, 255, 0.04);
+    --stripe: rgba(255, 255, 255, 0.02)
 }
 
 * {
@@ -29,9 +29,28 @@ body {
     -moz-osx-font-smoothing: grayscale
 }
 
+body {
+    background: var(--bg);
+}
+
+/* fallback color */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(1200px 800px at 10% 0%, #1a1f47 0%, var(--bg) 60%), var(--bg);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    will-change: transform;
+    transform: translateZ(0);
+    /* avoid repaint seams */
+}
+
 .container {
-    max-width: 1060px;
-    margin: 40px auto;
+    max-width: 1280px;
+    margin: 80px auto;
     padding: 0 16px 64px
 }
 
@@ -113,8 +132,13 @@ button {
 
 .row {
     display: flex;
-    gap: 10px;
-    align-items: center
+    flex-wrap: wrap;
+    gap: 6px;
+    width: 100%;
+}
+
+.row.max-row {
+    width: auto;
 }
 
 /* SteamID Block */
@@ -243,10 +267,14 @@ tbody tr:nth-child(even) {
     gap: 10px
 }
 
+.playername {
+    margin-bottom: 6px;
+}
+
 .avatar {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
+    width: 72px;
+    height: 72px;
+    /* border-radius: 50%; */
     border: 1px solid rgba(255, 255, 255, .12);
     object-fit: cover
 }
@@ -262,7 +290,7 @@ tbody tr:nth-child(even) {
 }
 
 .group {
-    display: flex;
+    /* display: flex; */
     flex-wrap: wrap;
     gap: 6px
 }
@@ -271,30 +299,29 @@ tbody tr:nth-child(even) {
     background: var(--chip);
     border: 1px solid rgba(255, 255, 255, .08);
     padding: 4px 8px;
-    border-radius: 999px;
+    /* border-radius: 999px; */
     font-size: 11px;
-    white-space: nowrap
+    white-space: nowrap;
+    margin-bottom: 5px;
+    width: 90px;
 }
 
-.pill b {
-    font-weight: 800
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
 }
 
-body {
-    background: var(--bg);
+.status-dot.online {
+  background-color: #3ddc97; /* green */
 }
 
-/* fallback color */
-body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    background: radial-gradient(1200px 800px at 10% 0%, #1a1f47 0%, var(--bg) 60%), var(--bg);
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    will-change: transform;
-    transform: translateZ(0);
-    /* avoid repaint seams */
+.status-dot.offline {
+  background-color: #ff6b6b; /* red */
+}
+
+.status-dot.unknown {
+  background-color: #ffd000; /* orange */
 }
