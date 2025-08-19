@@ -133,6 +133,7 @@ async function getBMForPlayerName(name) {
     try {
         const url = buildBMUrl(name);
         const json = await fetchJSON(url);
+        console.log("player["+name+"]: "+JSON.stringify(json));
         return pickBestBMEntry(json, name); // null if no exact match
     } catch (e) {
         console.warn("BM fetch failed for", name, e);
