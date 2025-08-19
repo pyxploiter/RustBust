@@ -1,327 +1,1286 @@
+/* ============================================
+   RustBust - Material Design with Rust Colors
+   ============================================ */
+
+/* CSS Custom Properties - Material Design + Rust */
 :root {
-    --bg: #0f1222;
-    --card: #151935;
-    --muted: #8b93bd;
-    --text: #e8ecff;
-    --accent: #6ea8fe;
-    --ok: #3ddc97;
-    --err: #ff6b6b;
-    --radius: 14px;
-    --chip: rgba(255, 255, 255, 0.04);
-    --stripe: rgba(255, 255, 255, 0.02)
+  /* Rust Game Brand Colors - Flat */
+  --rust-primary: #ce412b;
+  --rust-primary-dark: #a63324;
+  --rust-primary-light: #e55a42;
+  --rust-secondary: #8b6914;
+  --rust-accent: #d4af37;
+  --rust-warning: #ff6b35;
+  --rust-danger: #b71c1c;
+  --rust-success: #2e7d32;
+
+  /* Material Design Neutrals */
+  --bg-primary: #121212;
+  --bg-secondary: #1e1e1e;
+  --bg-tertiary: #2d2d2d;
+  --bg-surface: #424242;
+  --bg-elevated: #616161;
+
+  /* Cream & Earth Tones - Flat */
+  --cream-light: #f4f1e8;
+  --cream: #e8dcc0;
+  --cream-dark: #d4c4a0;
+  --earth-light: #8b7355;
+  --earth: #6b5b47;
+  --earth-dark: #4a3f33;
+
+  /* Material Design Greys */
+  --grey-50: #fafafa;
+  --grey-100: #f5f5f5;
+  --grey-200: #eeeeee;
+  --grey-300: #e0e0e0;
+  --grey-400: #bdbdbd;
+  --grey-500: #9e9e9e;
+  --grey-600: #757575;
+  --grey-700: #616161;
+  --grey-800: #424242;
+  --grey-900: #212121;
+
+  /* Text Colors */
+  --text-primary: var(--cream-light);
+  --text-secondary: var(--cream);
+  --text-muted: var(--cream-dark);
+  --text-inverse: var(--bg-primary);
+  --text-rust: var(--rust-primary);
+
+  /* Material Design Elevation Shadows */
+  --elevation-1: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  --elevation-2: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+  --elevation-3: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+  --elevation-4: 0 14px 28px rgba(0, 0, 0, 0.25),
+    0 10px 10px rgba(0, 0, 0, 0.22);
+  --elevation-5: 0 19px 38px rgba(0, 0, 0, 0.3), 0 15px 12px rgba(0, 0, 0, 0.22);
+
+  /* Material Design Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  /* Material Design Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+
+  /* Typography */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
+  --font-mono: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas,
+    monospace;
+
+  /* Material Design Motion */
+  --duration-short: 150ms;
+  --duration-medium: 300ms;
+  --duration-long: 500ms;
+  --easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --easing-decelerate: cubic-bezier(0, 0, 0.2, 1);
+  --easing-accelerate: cubic-bezier(0.4, 0, 1, 1);
 }
 
-* {
-    box-sizing: border-box
+/* ============================================
+   Reset & Base Styles
+   ============================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-html,
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  line-height: 1.5;
+}
+
 body {
-    height: 100%
+  font-family: var(--font-sans);
+  font-weight: 400;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
 }
 
-body {
-    margin: 0;
-    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-    color: var(--text);
-    background: radial-gradient(1200px 800px at 10% 0%, #1a1f47 0%, var(--bg) 60%), var(--bg);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale
+/* ============================================
+   Background - Simple Material Design
+   ============================================ */
+
+.bg-decoration {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+  background: var(--bg-primary);
 }
 
-body {
-    background: var(--bg);
+/* ============================================
+   Navigation - Material Design
+   ============================================ */
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: rgba(30, 30, 30, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--rust-primary);
+  box-shadow: var(--elevation-2);
 }
 
-/* fallback color */
-body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    background: radial-gradient(1200px 800px at 10% 0%, #1a1f47 0%, var(--bg) 60%), var(--bg);
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    will-change: transform;
-    transform: translateZ(0);
-    /* avoid repaint seams */
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-4) var(--space-6);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-brand {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.brand-text {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--rust-primary);
+  letter-spacing: -0.01em;
+}
+
+.nav-subtitle {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.nav-links {
+  display: flex;
+  gap: var(--space-1);
+  background: var(--bg-tertiary);
+  padding: var(--space-1);
+  border-radius: var(--radius-lg);
+}
+
+.nav-link {
+  position: relative;
+  padding: var(--space-2) var(--space-4);
+  text-decoration: none;
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 0.875rem;
+  border-radius: var(--radius-md);
+  transition: all var(--duration-short) var(--easing-standard);
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.nav-link:hover {
+  color: var(--text-primary);
+  background: var(--bg-surface);
+}
+
+.nav-link.active {
+  color: var(--cream-light);
+  background: var(--rust-primary);
+}
+
+/* ============================================
+   Hero Section - Material Design
+   ============================================ */
+
+.hero {
+  position: relative;
+  padding: var(--space-20) 0;
+  background: var(--bg-secondary);
+}
+
+.hero-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+}
+
+.hero-content {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.hero-title {
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 900;
+  line-height: 1.1;
+  margin-bottom: var(--space-6);
+  letter-spacing: -0.02em;
+}
+
+.gradient-text {
+  color: var(--rust-primary);
+  display: inline-block;
+}
+
+.hero-description {
+  font-size: 1.25rem;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-12);
+  line-height: 1.6;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.hero-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-6);
+  margin-top: var(--space-12);
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.stat-item {
+  text-align: center;
+  padding: var(--space-8);
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--elevation-1);
+  transition: box-shadow var(--duration-medium) var(--easing-standard);
+}
+
+.stat-item:hover {
+  box-shadow: var(--elevation-3);
+}
+
+.stat-number {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--rust-primary);
+  margin-bottom: var(--space-2);
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+/* ============================================
+   Main Content
+   ============================================ */
+
+.main-container {
+  position: relative;
+  z-index: 1;
 }
 
 .container {
-    max-width: 1280px;
-    margin: 80px auto;
-    padding: 0 16px 64px
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-6) var(--space-20);
 }
 
-header {
-    margin-bottom: 16px
+/* ============================================
+   Section Headers
+   ============================================ */
+
+.section-header {
+  text-align: center;
+  margin-bottom: var(--space-12);
 }
 
-h1 {
-    margin: 0;
-    font-weight: 800;
-    font-size: 24px
+.section-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: var(--space-3);
+  color: var(--text-primary);
+  position: relative;
 }
 
-.subtitle {
-    color: var(--muted);
-    font-size: 13px;
-    margin-top: 6px
+.section-title::after {
+  content: "";
+  position: absolute;
+  bottom: -var(--space-2);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 48px;
+  height: 3px;
+  background: var(--rust-primary);
+  border-radius: 2px;
 }
 
-.card {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: var(--radius);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .05)
+.section-description {
+  font-size: 1.125rem;
+  color: var(--text-secondary);
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
 }
 
-.controls {
-    padding: 14px;
-    display: grid;
-    grid-template-columns: 1fr auto auto;
-    gap: 10px;
-    align-items: end
+/* ============================================
+   Search Section - Material Design
+   ============================================ */
+
+.search-section {
+  margin-bottom: var(--space-16);
 }
 
-label {
-    font-size: 12px;
-    color: var(--muted)
+.search-card {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+  box-shadow: var(--elevation-2);
+  max-width: 800px;
+  margin: 0 auto;
 }
 
-.input {
-    display: grid;
-    gap: 6px
+.search-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
 }
 
-input[type=text] {
-    width: 100%;
-    background: #0e1330;
-    color: var(--text);
-    border: 1px solid rgba(255, 255, 255, .1);
-    padding: 12px;
-    border-radius: 10px;
-    font-size: 14px;
-    outline: none
+.input-group {
+  display: flex;
+  gap: var(--space-4);
+  align-items: end;
 }
 
-input[type=text]:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(110, 168, 254, .25)
+.input-wrapper {
+  position: relative;
+  flex: 1;
 }
 
-button {
-    appearance: none;
-    border: 0;
-    cursor: pointer;
-    padding: 12px 14px;
-    border-radius: 10px;
-    font-weight: 700
+.input-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-2);
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.input-label svg {
+  color: var(--rust-primary);
+}
+
+.search-input {
+  width: 100%;
+  padding: var(--space-4) var(--space-5);
+  background: var(--bg-tertiary);
+  border: 2px solid transparent;
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 400;
+  transition: all var(--duration-short) var(--easing-standard);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--rust-primary);
+  background: var(--bg-surface);
+}
+
+.search-input::placeholder {
+  color: var(--text-muted);
+}
+
+.button-group {
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* ============================================
+   Buttons - Material Design
+   ============================================ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all var(--duration-short) var(--easing-standard);
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  box-shadow: var(--elevation-1);
+}
+
+.btn:hover {
+  box-shadow: var(--elevation-2);
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(0);
+  box-shadow: var(--elevation-1);
 }
 
 .btn-primary {
-    background: var(--accent);
-    color: #0a0f2b
+  background: var(--rust-primary);
+  color: var(--cream-light);
+}
+
+.btn-primary:hover {
+  background: var(--rust-primary-light);
+}
+
+.btn-secondary {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+  background: var(--bg-elevated);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--bg-surface);
+  box-shadow: none;
+}
+
+.btn-outline:hover {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  box-shadow: var(--elevation-1);
 }
 
 .btn-ghost {
-    background: rgba(255, 255, 255, .08);
-    color: var(--text)
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  box-shadow: none;
 }
 
-.row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    width: 100%;
+.btn-ghost:hover {
+  background: var(--bg-surface);
+  color: var(--text-primary);
 }
 
-.row.max-row {
-    width: auto;
+/* ============================================
+   Loading States - Material Design
+   ============================================ */
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-6);
+  padding: var(--space-12);
+  text-align: center;
 }
 
-/* SteamID Block */
-.result {
-    margin-top: 16px;
-    padding: 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--bg-surface);
+  border-top: 3px solid var(--rust-primary);
+  border-radius: 50%;
+  animation: spin var(--duration-long) linear infinite;
 }
 
-.muted {
-    color: var(--muted);
-    font-size: 13px
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
-.big {
-    font-size: 18px;
-    font-weight: 800
+.loading-text {
+  color: var(--text-secondary);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
 }
 
-.err {
-    color: var(--err)
+/* ============================================
+   Results Section - Material Design
+   ============================================ */
+
+.results-section {
+  margin-bottom: var(--space-16);
 }
 
-code {
-    background: #0b0f24;
-    border: 1px solid rgba(255, 255, 255, .08);
-    padding: 8px 10px;
-    border-radius: 8px
+.result-card {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+  box-shadow: var(--elevation-2);
+  max-width: 800px;
+  margin: 0 auto;
 }
 
-/* Team section */
-.section {
-    margin-top: 18px
+.result-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6);
 }
 
-.section h3 {
-    margin: 0 0 10px;
-    font-size: 16px
+.result-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  flex: 1;
 }
 
-.kpis {
-    display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    gap: 8px
+.result-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  background: var(--rust-primary);
+  border-radius: var(--radius-lg);
+  color: var(--cream-light);
 }
 
-.kpi {
-    background: var(--chip);
-    padding: 10px;
-    border-radius: 10px;
-    text-align: center
+.result-data {
+  flex: 1;
 }
 
-.kpi .label {
-    font-size: 11px;
-    color: var(--muted)
+.result-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: var(--space-1);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
 }
 
-.kpi .value {
-    font-weight: 800;
-    font-size: 16px
+.result-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
 }
 
-.team-head {
-    padding: 14px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px
+.result-actions {
+  display: flex;
+  gap: var(--space-2);
 }
 
-.badge {
-    padding: 4px 8px;
-    border-radius: 100px;
-    font-size: 11px;
-    color: #0a0f2b;
-    font-weight: 700
+.status-message {
+  margin-top: var(--space-6);
+  padding: var(--space-4);
+  text-align: center;
+  border-radius: var(--radius-md);
+  font-weight: 500;
 }
 
-.badge.ok {
-    background: var(--ok)
+.status-message.err {
+  background: rgba(183, 28, 28, 0.1);
+  color: var(--rust-danger);
 }
 
-.badge.err {
-    background: var(--err)
+/* ============================================
+   Team Section - Material Design
+   ============================================ */
+
+.team-section {
+  margin-bottom: var(--space-16);
 }
 
-.table-card {
-    padding: 0;
-    overflow: auto
+.team-overview-card {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--elevation-2);
+  margin-bottom: var(--space-8);
+  overflow: hidden;
 }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px
+.team-header {
+  padding: var(--space-8);
+  border-bottom: 1px solid var(--bg-tertiary);
 }
 
-thead th {
-    text-align: left;
-    font-weight: 700;
-    font-size: 12px;
-    color: var(--muted);
-    padding: 10px 12px;
-    border-bottom: 1px solid rgba(255, 255, 255, .08);
-    background: rgba(255, 255, 255, .02);
-    position: sticky;
-    top: 0
+.team-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6);
 }
 
-tbody td {
-    padding: 10px 12px;
-    border-bottom: 1px solid rgba(255, 255, 255, .06)
+.team-identity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  flex: 1;
 }
 
-tbody tr:nth-child(even) {
-    background: var(--stripe)
+.team-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  background: var(--rust-secondary);
+  border-radius: var(--radius-lg);
+  color: var(--cream-light);
 }
 
+.team-details {
+  flex: 1;
+}
+
+.team-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--space-1);
+}
+
+.team-id-value {
+  color: var(--rust-primary);
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+.team-clan-tag {
+  color: var(--rust-accent);
+  font-weight: 600;
+}
+
+.team-meta {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.team-status {
+  display: flex;
+  align-items: center;
+}
+
+.status-badge {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-xl);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.status-badge.ok {
+  background: var(--rust-success);
+  color: var(--cream-light);
+}
+
+.status-badge.err {
+  background: var(--rust-danger);
+  color: var(--cream-light);
+}
+
+/* ============================================
+   Team Stats Grid - Material Design
+   ============================================ */
+
+.team-stats-grid {
+  padding: var(--space-8);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-6);
+}
+
+.stat-card {
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  transition: all var(--duration-medium) var(--easing-standard);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  box-shadow: var(--elevation-1);
+}
+
+.stat-card:hover {
+  box-shadow: var(--elevation-2);
+  transform: translateY(-2px);
+}
+
+.stat-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  color: var(--cream-light);
+}
+
+.stat-icon.rank {
+  background: #d4af37;
+}
+
+.stat-icon.rating {
+  background: var(--rust-primary);
+}
+
+.stat-icon.pvp {
+  background: #d32f2f;
+}
+
+.stat-icon.pve {
+  background: #388e3c;
+}
+
+.stat-icon.ballistics {
+  background: #7b1fa2;
+}
+
+.stat-icon.gather {
+  background: #f57c00;
+}
+
+.stat-info {
+  flex: 1;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--space-1);
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+/* ============================================
+   Team Table - Material Design
+   ============================================ */
+
+.team-table-section {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--elevation-2);
+  overflow: hidden;
+}
+
+.table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-8);
+  border-bottom: 1px solid var(--bg-tertiary);
+}
+
+.table-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.table-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.team-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.team-table thead th {
+  background: var(--bg-tertiary);
+  padding: var(--space-4);
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--bg-surface);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.team-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color var(--duration-short) var(--easing-standard);
+}
+
+.team-table th.sortable:hover {
+  background: var(--bg-surface);
+}
+
+.team-table th.sortable {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.sort-icon {
+  opacity: 0.6;
+  transition: opacity var(--duration-short) var(--easing-standard);
+  color: var(--rust-primary);
+}
+
+.team-table th.sortable:hover .sort-icon {
+  opacity: 1;
+}
+
+.team-table tbody td {
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--bg-tertiary);
+  vertical-align: top;
+}
+
+.team-table tbody tr {
+  transition: background-color var(--duration-short) var(--easing-standard);
+}
+
+.team-table tbody tr:hover {
+  background: var(--bg-tertiary);
+}
+
+/* Player cell styling */
 .player {
-    display: flex;
-    align-items: center;
-    gap: 10px
-}
-
-.playername {
-    margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
 }
 
 .avatar {
-    width: 100px;
-    height: 100px;
-    /* border-radius: 50%; */
-    border: 1px solid rgba(255, 255, 255, .12);
-    object-fit: cover
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--rust-primary);
+  object-fit: cover;
+  transition: transform var(--duration-short) var(--easing-standard);
+}
+
+.avatar:hover {
+  transform: scale(1.05);
+}
+
+.player > div {
+  flex: 1;
+}
+
+.player > div > div:first-child {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-1);
 }
 
 .steam {
-    color: var(--muted);
-    font-size: 11px
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  background: var(--bg-tertiary);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
 }
 
-.sub {
-    color: var(--muted);
-    font-size: 11px
+/* Stats styling */
+.big {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: var(--space-2);
 }
 
 .group {
-    /* display: flex; */
-    flex-wrap: wrap;
-    gap: 6px
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
 }
 
 .pill {
-    background: var(--chip);
-    border: 1px solid rgba(255, 255, 255, .08);
-    padding: 4px 8px;
-    /* border-radius: 999px; */
-    font-size: 11px;
-    white-space: nowrap;
-    margin-bottom: 5px;
-    width: 90px;
+  background: var(--bg-tertiary);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-xl);
+  font-size: 0.75rem;
+  white-space: nowrap;
+  transition: background-color var(--duration-short) var(--easing-standard);
+  font-weight: 500;
 }
 
-.status-dot {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  margin-right: 6px;
+.pill:hover {
+  background: var(--bg-surface);
 }
 
-.status-dot.online {
-  background-color: #3ddc97; /* green */
+.pill b {
+  font-weight: 700;
+  color: var(--rust-primary);
 }
 
-.status-dot.offline {
-  background-color: #ff6b6b; /* red */
+/* ============================================
+   Footer - Material Design
+   ============================================ */
+
+.footer {
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--rust-primary);
+  margin-top: var(--space-20);
 }
 
-.status-dot.unknown {
-  background-color: #ffd000; /* orange */
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-16) var(--space-6) var(--space-8);
+}
+
+.footer-content {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: var(--space-16);
+  margin-bottom: var(--space-12);
+}
+
+.footer-brand {
+  max-width: 300px;
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.footer-logo span {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.footer-description {
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.footer-links {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--space-8);
+}
+
+.footer-section h4 {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--rust-primary);
+  margin-bottom: var(--space-4);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.footer-section ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.footer-section a {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.875rem;
+  transition: color var(--duration-short) var(--easing-standard);
+  font-weight: 400;
+}
+
+.footer-section a:hover {
+  color: var(--rust-primary);
+}
+
+.footer-bottom {
+  border-top: 1px solid var(--bg-tertiary);
+  padding-top: var(--space-8);
+}
+
+.footer-bottom-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6);
+}
+
+.footer-bottom p {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+
+.footer-bottom-links {
+  display: flex;
+  gap: var(--space-6);
+}
+
+.footer-bottom-links a {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.875rem;
+  transition: color var(--duration-short) var(--easing-standard);
+  font-weight: 400;
+}
+
+.footer-bottom-links a:hover {
+  color: var(--rust-primary);
+}
+
+/* ============================================
+   Responsive Design
+   ============================================ */
+
+@media (max-width: 1024px) {
+  .nav-container {
+    padding: var(--space-4);
+  }
+
+  .hero {
+    padding: var(--space-16) 0;
+  }
+
+  .hero-stats {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  .container {
+    padding: 0 var(--space-4) var(--space-16);
+  }
+
+  .team-stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--space-4);
+  }
+}
+
+@media (max-width: 768px) {
+  .nav-container {
+    flex-direction: column;
+    gap: var(--space-4);
+    align-items: flex-start;
+  }
+
+  .nav-links {
+    order: -1;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .input-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .button-group {
+    justify-content: stretch;
+  }
+
+  .result-content {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .result-actions {
+    justify-content: center;
+  }
+
+  .team-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-4);
+  }
+
+  .team-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .table-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-4);
+  }
+
+  .table-container {
+    font-size: 0.875rem;
+  }
+
+  .footer-content {
+    grid-template-columns: 1fr;
+    gap: var(--space-12);
+  }
+
+  .footer-bottom-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-4);
+  }
+}
+
+@media (max-width: 480px) {
+  .search-card {
+    padding: var(--space-6);
+  }
+
+  .team-overview-card,
+  .team-table-section {
+    margin: 0 -var(--space-4);
+    border-radius: 0;
+  }
+
+  .stat-card {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--space-3);
+  }
+
+  .team-table thead th,
+  .team-table tbody td {
+    padding: var(--space-2);
+  }
+
+  .player {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--space-2);
+  }
+
+  .group {
+    justify-content: center;
+  }
+}
+
+/* ============================================
+   Animations & Interactions
+   ============================================ */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.search-section {
+  animation: fadeInUp var(--duration-long) var(--easing-decelerate);
+}
+
+.results-section {
+  animation: slideInRight var(--duration-long) var(--easing-decelerate);
+}
+
+.team-section {
+  animation: fadeInUp var(--duration-long) var(--easing-decelerate);
+}
+
+/* Focus management */
+.btn:focus-visible,
+.search-input:focus-visible,
+.nav-link:focus-visible {
+  outline: 2px solid var(--rust-primary);
+  outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+  .navbar,
+  .hero,
+  .footer {
+    display: none;
+  }
+
+  .bg-decoration {
+    display: none;
+  }
+
+  * {
+    background: white !important;
+    color: black !important;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  :root {
+    --bg-secondary: var(--bg-tertiary);
+    --bg-tertiary: var(--bg-surface);
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
