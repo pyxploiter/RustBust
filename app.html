@@ -57,6 +57,14 @@
     .group{display:flex;flex-wrap:wrap;gap:6px}
     .pill{background:var(--chip);border:1px solid rgba(255,255,255,.08);padding:4px 8px;border-radius:999px;font-size:11px;white-space:nowrap}
     .pill b{font-weight:800}
+
+    body{background:var(--bg);} /* fallback color */
+    body::before{
+    content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+    background:radial-gradient(1200px 800px at 10% 0%, #1a1f47 0%, var(--bg) 60%), var(--bg);
+    background-repeat:no-repeat;background-attachment:fixed;
+    will-change:transform;transform:translateZ(0); /* avoid repaint seams */
+    }
   </style>
 </head>
 <body>
